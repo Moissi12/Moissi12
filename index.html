@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pour Maëna 🌌✨</title>
+
+    <!-- Balises OpenGraph pour l'aperçu WhatsApp -->
+    <meta property="og:title" content="Une surprise pour toi Maëna... 🌌✨">
+    <meta property="og:description" content="Explore ma petite galaxie pour découvrir ce que j'ai sur le cœur.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#ff4081">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff4081;
+            --secondary: #00e5ff;
+            --glass: rgba(15, 15, 35, 0.85);
+        }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #020208; 
+            font-family: 'Montserrat', sans-serif; 
+            color: white; 
+            background: radial-gradient(circle at center, #0a0a20 0%, #020208 100%);
+        }
+        body::after {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 2px);
+            pointer-events: none; z-index: 100; opacity: 0.3;
+        }
+        canvas { display: block; }
+        
+        /* Titre spatial au survol des planètes (Texte 3D simulé) */
+        #spatial-label {
+            position: absolute;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--secondary);
+            font-size: 1.8em;
+            font-weight: 700;
+            letter-spacing: 3px;
+            pointer-events: none;
+            text-shadow: 0 0 15px var(--secondary), 0 0 30px rgba(0, 229, 255, 0.5);
+            display: none;
+            transform: translate(-50%, -100%);
+            z-index: 5;
+            text-transform: uppercase;
+        }
+
+        /* Pop-up design futuriste */
+        .modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 64, 129, 0.2);
+            max-width: 450px;
+            text-align: center;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .modal.active { transform: translate(-50%, -50%) scale(1); }
+        .modal h3 { 
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary); 
+            margin-top: 0; 
+            font-size: 2em; 
+            letter-spacing: 2px; 
+            text-shadow: 0 0 15px rgba(255, 64, 129, 0.6);
+        }
+        .modal p { color: #cfd8dc; line-height: 1.8; font-size: 1.1em; font-weight: 300; }
+        
+        .close-btn {
+            background: linear-gradient(135deg, var(--primary), #b030b0);
+            color: white; border: none; 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9em;
+            font-weight: bold;
+            padding: 15px 30px; border-radius: 50px; cursor: pointer; margin-top: 25px;
+            box-shadow: 0 5px 15px rgba(255, 64, 129, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .close-btn:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 8px 25px rgba(255, 64, 129, 0.6); }
+
+        /* Écran de démarrage (Overlay) */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0a0a20 0%, #020208 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease, visibility 1s;
+        }
+        #overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        #overlay h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2em, 8vw, 4em);
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary), 0 0 60px var(--primary);
+            letter-spacing: 10px;
+            animation: pulseText 3s infinite alternate ease-in-out;
+        }
+        @keyframes pulseText {
+            from { opacity: 0.8; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+</head>
+<body>
+
+    <!-- Écran d'accueil -->
+    <div id="overlay">
+        <h1>MAËNA</h1>
+        <button class="close-btn" onclick="startExperience()">Commencer l'exploration 🌌</button>
+    </div>
+
+    <!-- Musique d'ambiance (Source libre de droit) -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.chosic.com/wp-content/uploads/2021/07/The-Great-Unknown.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="spatial-label">TITRE</div>
+
+    <div id="infoModal" class="modal">
+        <h3 id="modalTitle">Titre</h3>
+        <p id="modalText">Texte...</p>
+        <button class="close-btn" onclick="closeModal()">Retour à l'univers 🚀</button>
+    </div>
+
+    <script src="galaxy.js"></script>
+    <script>
+        function startExperience() {
+            const overlay = document.getElementById('overlay');
+            const music = document.getElementById('bgMusic');
+            
+            overlay.classList.add('hidden');
+            
+            // Initialise le volume à 0 pour le fondu
+            music.volume = 0;
+            music.play().then(() => {
+                // Augmente le volume progressivement toutes les 100ms
+                let fadeIn = setInterval(() => {
+                    if (music.volume < 0.4) {
+                        music.volume += 0.02;
+                    } else {
+                        clearInterval(fadeIn);
+                    }
+                }, 100);
+            }).catch(err => console.log("Lecture audio bloquée :", err));
+        }
+
+        function closeModal() {
+            document.getElementById('infoModal').classList.remove('active');
+            isZoomed = false; // Permet à la caméra de revenir à sa position d'origine
+        }
+    </script>
+</body>
+</html>
